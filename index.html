@@ -1,850 +1,696 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>¿Me disculpas? ❤️</title>
 
     <style>
-        * {
-            box-sizing: border-box;
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background:
+          radial-gradient(circle at top left, #ffd9e2, transparent 35%),
+          radial-gradient(circle at bottom right, #ffe8c7, transparent 40%),
+          #fff7f8;
+        overflow: hidden;
+        color: #3f3034;
+      }
+
+      .page {
+        position: absolute;
+        inset: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 24px;
+
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px) scale(0.98);
+
+        transition:
+          opacity 0.45s ease,
+          transform 0.45s ease,
+          visibility 0.45s;
+      }
+
+      .page.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+      }
+
+      .card {
+        width: min(520px, 100%);
+        padding: 36px;
+        text-align: center;
+
+        background: rgba(255, 255, 255, 0.87);
+        backdrop-filter: blur(14px);
+
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 28px;
+
+        box-shadow:
+          0 30px 80px rgba(120, 63, 80, 0.15),
+          0 4px 12px rgba(120, 63, 80, 0.06);
+      }
+
+      h1 {
+        margin: 10px 0;
+        font-size: clamp(2rem, 7vw, 3.3rem);
+        line-height: 1.05;
+      }
+
+      h2 {
+        margin: 10px 0;
+        font-size: 2rem;
+      }
+
+      p {
+        color: #7d656c;
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      .gif {
+        width: 190px;
+        height: 190px;
+
+        margin: 0 auto 12px;
+
+        object-fit: cover;
+        border-radius: 24px;
+
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+      }
+
+      .buttons {
+        min-height: 100px;
+        margin-top: 30px;
+
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+
+        padding: 14px 30px;
+
+        font: inherit;
+        font-weight: 700;
+        font-size: 1rem;
+
+        cursor: pointer;
+
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          background-color 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+      }
+
+      #yesButton {
+        background: #e55b78;
+        color: white;
+
+        box-shadow: 0 10px 25px rgba(229, 91, 120, 0.3);
+      }
+
+      #yesButton:hover {
+        background: #d94b69;
+      }
+
+      #noButton {
+        position: fixed;
+
+        background: #eee7e9;
+        color: #66575b;
+
+        z-index: 20;
+
+        transition:
+          left 0.18s ease,
+          top 0.18s ease,
+          transform 0.15s ease;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .option {
+        min-height: 115px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        padding: 20px;
+
+        border: 2px solid transparent;
+        border-radius: 20px;
+
+        background: #fff6f8;
+
+        cursor: pointer;
+
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease,
+          background-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .option:hover {
+        transform: translateY(-4px);
+
+        border-color: #ef9aad;
+        background: white;
+
+        box-shadow: 0 12px 25px rgba(120, 63, 80, 0.1);
+      }
+
+      .option.selected {
+        border-color: #e55b78;
+        background: #fff0f3;
+      }
+
+      .option span {
+        font-size: 2.2rem;
+      }
+
+      .option strong {
+        margin-top: 8px;
+      }
+
+      .continue-button {
+        width: 100%;
+        margin-top: 24px;
+
+        background: #e55b78;
+        color: white;
+
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .continue-button.enabled {
+        opacity: 1;
+        cursor: pointer;
+      }
+
+      .continue-button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .heart {
+        display: inline-block;
+        font-size: 5rem;
+        animation: heartbeat 1.2s infinite;
+      }
+
+      .selected-compensation {
+        margin: 22px 0;
+        padding: 16px 20px;
+
+        border-radius: 16px;
+
+        background: #fff0f3;
+        color: #b43c59;
+
+        font-weight: 700;
+      }
+
+      .small {
+        font-size: 0.87rem;
+        color: #a68f95;
+      }
+
+      .status-message {
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+
+      .status-message.error {
+        color: #b42318;
+      }
+
+      .status-message.sending {
+        color: #7d656c;
+      }
+
+      @keyframes heartbeat {
+        0%,
+        100% {
+          transform: scale(1);
         }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background:
-                radial-gradient(circle at top left, #ffd9e2, transparent 35%),
-                radial-gradient(circle at bottom right, #ffe8c7, transparent 40%),
-                #fff7f8;
-            overflow: hidden;
-            color: #3f3034;
+        50% {
+          transform: scale(1.12);
         }
+      }
 
-        .page {
-            position: absolute;
-            inset: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 24px;
-
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px) scale(.98);
-
-            transition:
-                opacity .45s ease,
-                transform .45s ease,
-                visibility .45s;
-        }
-
-        .page.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) scale(1);
-        }
-
+      @media (max-width: 560px) {
         .card {
-            width: min(520px, 100%);
-            padding: 36px;
-            text-align: center;
-
-            background: rgba(255, 255, 255, .87);
-            backdrop-filter: blur(14px);
-
-            border: 1px solid rgba(255,255,255,.9);
-            border-radius: 28px;
-
-            box-shadow:
-                0 30px 80px rgba(120, 63, 80, .15),
-                0 4px 12px rgba(120, 63, 80, .06);
-        }
-
-        h1 {
-            margin: 10px 0;
-            font-size: clamp(2rem, 7vw, 3.3rem);
-            line-height: 1.05;
-        }
-
-        h2 {
-            margin: 10px 0;
-            font-size: 2rem;
-        }
-
-        p {
-            color: #7d656c;
-            font-size: 1.05rem;
-            line-height: 1.6;
-        }
-
-        .gif {
-            width: 190px;
-            height: 190px;
-
-            margin: 0 auto 12px;
-
-            object-fit: cover;
-            border-radius: 24px;
-
-            box-shadow: 0 15px 30px rgba(0,0,0,.08);
-        }
-
-        .buttons {
-            min-height: 100px;
-            margin-top: 30px;
-
-            position: relative;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-        }
-
-        button {
-            border: none;
-            border-radius: 999px;
-
-            padding: 14px 30px;
-
-            font: inherit;
-            font-weight: 700;
-            font-size: 1rem;
-
-            cursor: pointer;
-
-            transition:
-                transform .2s ease,
-                box-shadow .2s ease,
-                background-color .2s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-        }
-
-        #yesButton {
-            background: #e55b78;
-            color: white;
-
-            box-shadow: 0 10px 25px rgba(229, 91, 120, .3);
-        }
-
-        #yesButton:hover {
-            background: #d94b69;
-        }
-
-        #noButton {
-            position: fixed;
-
-            background: #eee7e9;
-            color: #66575b;
-
-            z-index: 20;
-
-            transition:
-                left .18s ease,
-                top .18s ease,
-                transform .15s ease;
+          padding: 26px 20px;
         }
 
         .options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-
-            gap: 14px;
-            margin-top: 28px;
+          grid-template-columns: 1fr;
+          max-height: 55vh;
+          overflow-y: auto;
         }
 
-        .option {
-            min-height: 115px;
-
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-
-            padding: 20px;
-
-            border: 2px solid transparent;
-            border-radius: 20px;
-
-            background: #fff6f8;
-
-            cursor: pointer;
-
-            transition:
-                transform .2s ease,
-                border-color .2s ease,
-                background-color .2s ease,
-                box-shadow .2s ease;
+        .gif {
+          width: 160px;
+          height: 160px;
         }
-
-        .option:hover {
-            transform: translateY(-4px);
-
-            border-color: #ef9aad;
-            background: white;
-
-            box-shadow: 0 12px 25px rgba(120, 63, 80, .10);
-        }
-
-        .option.selected {
-            border-color: #e55b78;
-            background: #fff0f3;
-        }
-
-        .option span {
-            font-size: 2.2rem;
-        }
-
-        .option strong {
-            margin-top: 8px;
-        }
-
-        .continue-button {
-            width: 100%;
-            margin-top: 24px;
-
-            background: #e55b78;
-            color: white;
-
-            opacity: .45;
-            cursor: not-allowed;
-        }
-
-        .continue-button.enabled {
-            opacity: 1;
-            cursor: pointer;
-        }
-
-        .continue-button:disabled {
-            opacity: .45;
-            cursor: not-allowed;
-        }
-
-        .heart {
-            display: inline-block;
-            font-size: 5rem;
-            animation: heartbeat 1.2s infinite;
-        }
-
-        .selected-compensation {
-            margin: 22px 0;
-            padding: 16px 20px;
-
-            border-radius: 16px;
-
-            background: #fff0f3;
-            color: #b43c59;
-
-            font-weight: 700;
-        }
-
-        .small {
-            font-size: .87rem;
-            color: #a68f95;
-        }
-
-        .status-message {
-            margin-top: 14px;
-            font-size: .9rem;
-        }
-
-        .status-message.error {
-            color: #b42318;
-        }
-
-        .status-message.sending {
-            color: #7d656c;
-        }
-
-        @keyframes heartbeat {
-            0%, 100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.12);
-            }
-        }
-
-        @media (max-width: 560px) {
-            .card {
-                padding: 26px 20px;
-            }
-
-            .options {
-                grid-template-columns: 1fr;
-                max-height: 55vh;
-                overflow-y: auto;
-            }
-
-            .gif {
-                width: 160px;
-                height: 160px;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
+    <!-- ===================== -->
+    <!-- PÁGINA 1: DISCULPAS   -->
+    <!-- ===================== -->
 
-<!-- ===================== -->
-<!-- PÁGINA 1: DISCULPAS   -->
-<!-- ===================== -->
-
-<section id="apologyPage" class="page active">
-
-    <div class="card">
-
+    <section id="apologyPage" class="page active">
+      <div class="card">
         <img
-            class="gif"
-            src="https://media.giphy.com/media/ISOckXUybVfQ4/giphy.gif"
-            alt="Carita pidiendo disculpas"
-        >
+          class="gif"
+          src="https://media.giphy.com/media/ISOckXUybVfQ4/giphy.gif"
+          alt="Carita pidiendo disculpas"
+        />
 
         <h1>¿Me disculpas? 🥺</h1>
 
         <p>
-            Reconozco que metí la pata y vengo oficialmente
-            a solicitar el perdón correspondiente.
+          Puede que a veces me veas molesto o un poco distante, pero al final
+          del día no hay motivo para quedarnos atrapados en los detalles.
+          <br /><br />
+          Tú no has hecho nada malo. A veces simplemente se me cruzan los cables
+          y reacciono de una forma que no representa lo que realmente siento.
+          <br /><br />
+          Porque, tarde o temprano, siempre termina pesando más el cariño que
+          cualquier enojo pasajero.
+          <br /><br />
+          Así que sí… esta página existe porque me toca pedir disculpas. 😅❤️
         </p>
 
         <div class="buttons">
-            <button id="yesButton" type="button">
-                Sí ❤️
-            </button>
+          <button id="yesButton" type="button">Sí ❤️</button>
         </div>
 
-        <p class="small">
-            Hay dos opciones... técnicamente.
-        </p>
+        <p class="small">Hay dos opciones... técnicamente.</p>
+      </div>
+    </section>
 
-    </div>
+    <button id="noButton" type="button" tabindex="-1" aria-label="No">
+      No 😶
+    </button>
 
-</section>
+    <!-- ========================= -->
+    <!-- PÁGINA 2: COMPENSACIÓN    -->
+    <!-- ========================= -->
 
-<button
-    id="noButton"
-    type="button"
-    tabindex="-1"
-    aria-label="No"
->
-    No 😶
-</button>
-
-
-<!-- ========================= -->
-<!-- PÁGINA 2: COMPENSACIÓN    -->
-<!-- ========================= -->
-
-<section id="compensationPage" class="page">
-
-    <div class="card">
-
+    <section id="compensationPage" class="page">
+      <div class="card">
         <h2>Compensación oficial 🍦</h2>
 
-        <p>
-            Toda disculpa seria necesita una compensación.
-            Elige sabiamente:
-        </p>
+        <p>Toda disculpa seria necesita una compensación. Elige sabiamente:</p>
 
         <div class="options">
+          <div class="option" data-value="Un helado 🍦">
+            <span>🍦</span>
+            <strong>Helado</strong>
+          </div>
 
-            <div class="option" data-value="Un helado 🍦">
-                <span>🍦</span>
-                <strong>Helado</strong>
-            </div>
+          <div class="option" data-value="Un café ☕">
+            <span>☕</span>
+            <strong>Café</strong>
+          </div>
 
-            <div class="option" data-value="Un café ☕">
-                <span>☕</span>
-                <strong>Café</strong>
-            </div>
+          <div class="option" data-value="Una cena 🍕">
+            <span>🍕</span>
+            <strong>Cena</strong>
+          </div>
 
-            <div class="option" data-value="Una cena 🍕">
-                <span>🍕</span>
-                <strong>Cena</strong>
-            </div>
+          <div class="option" data-value="Una salida al cine 🍿">
+            <span>🍿</span>
+            <strong>Cine</strong>
+          </div>
 
-            <div class="option" data-value="Una salida al cine 🍿">
-                <span>🍿</span>
-                <strong>Cine</strong>
-            </div>
+          <div class="option" data-value="Una merienda 🧁">
+            <span>🧁</span>
+            <strong>Merienda</strong>
+          </div>
 
-            <div class="option" data-value="Una merienda 🧁">
-                <span>🧁</span>
-                <strong>Merienda</strong>
-            </div>
-
-            <div class="option" data-value="Elegir la compensación personalmente 👑">
-                <span>👑</span>
-                <strong>Yo elijo</strong>
-            </div>
-
+          <div
+            class="option"
+            data-value="Elegir la compensación personalmente 👑"
+          >
+            <span>👑</span>
+            <strong>Yo elijo</strong>
+          </div>
         </div>
 
         <form
-            id="compensationForm"
-            action="https://formspree.io/f/xdeklwbb"
-            method="POST"
+          id="compensationForm"
+          action="https://formspree.io/f/xdeklwbb"
+          method="POST"
         >
-            <input
-                type="hidden"
-                name="compensacion"
-                id="compensationInput"
-            >
+          <input type="hidden" name="compensacion" id="compensationInput" />
 
-            <input
-                type="hidden"
-                name="fecha"
-                id="dateInput"
-            >
+          <input type="hidden" name="fecha" id="dateInput" />
 
-            <input
-                type="hidden"
-                name="origen"
-                value="Página de disculpas"
-            >
+          <input type="hidden" name="origen" value="Página de disculpas" />
 
-            <button
-                type="submit"
-                id="continueButton"
-                class="continue-button"
-                disabled
-            >
-                Confirmar compensación
-            </button>
+          <button
+            type="submit"
+            id="continueButton"
+            class="continue-button"
+            disabled
+          >
+            Confirmar compensación
+          </button>
 
-            <div
-                id="statusMessage"
-                class="status-message"
-                aria-live="polite"
-            ></div>
+          <div
+            id="statusMessage"
+            class="status-message"
+            aria-live="polite"
+          ></div>
         </form>
+      </div>
+    </section>
 
-    </div>
+    <!-- ======================= -->
+    <!-- PÁGINA 3: GRACIAS       -->
+    <!-- ======================= -->
 
-</section>
-
-
-<!-- ======================= -->
-<!-- PÁGINA 3: GRACIAS       -->
-<!-- ======================= -->
-
-<section id="thanksPage" class="page">
-
-    <div class="card">
-
+    <section id="thanksPage" class="page">
+      <div class="card">
         <div class="heart">❤️</div>
 
         <h1>Gracias</h1>
 
-        <p>
-            Prometo apreciar este acto de misericordia.
-        </p>
+        <p>Prometo apreciar este acto de misericordia.</p>
 
-        <div
-            id="selectedCompensation"
-            class="selected-compensation"
-        ></div>
+        <div id="selectedCompensation" class="selected-compensation"></div>
 
         <p>
-            Tu perdón ha sido registrado oficialmente.
-            No se aceptan devoluciones.
+          Tu perdón ha sido registrado oficialmente. No se aceptan devoluciones.
         </p>
 
-        <p class="small">
-            ❤️ Fin del protocolo de disculpas ❤️
-        </p>
+        <p class="small">❤️ Fin del protocolo de disculpas ❤️</p>
+      </div>
+    </section>
 
-    </div>
+    <script>
+      const apologyPage = document.getElementById("apologyPage");
+      const compensationPage = document.getElementById("compensationPage");
+      const thanksPage = document.getElementById("thanksPage");
 
-</section>
+      const yesButton = document.getElementById("yesButton");
+      const noButton = document.getElementById("noButton");
 
+      const options = document.querySelectorAll(".option");
 
-<script>
-    const apologyPage = document.getElementById('apologyPage');
-    const compensationPage = document.getElementById('compensationPage');
-    const thanksPage = document.getElementById('thanksPage');
+      const compensationForm = document.getElementById("compensationForm");
 
-    const yesButton = document.getElementById('yesButton');
-    const noButton = document.getElementById('noButton');
+      const compensationInput = document.getElementById("compensationInput");
 
-    const options = document.querySelectorAll('.option');
+      const dateInput = document.getElementById("dateInput");
 
-    const compensationForm =
-        document.getElementById('compensationForm');
+      const continueButton = document.getElementById("continueButton");
 
-    const compensationInput =
-        document.getElementById('compensationInput');
+      const selectedCompensation = document.getElementById(
+        "selectedCompensation",
+      );
 
-    const dateInput =
-        document.getElementById('dateInput');
+      const statusMessage = document.getElementById("statusMessage");
 
-    const continueButton =
-        document.getElementById('continueButton');
+      let selectedOption = null;
 
-    const selectedCompensation =
-        document.getElementById('selectedCompensation');
-
-    const statusMessage =
-        document.getElementById('statusMessage');
-
-    let selectedOption = null;
-
-
-    /*
-     * Cambio entre pantallas
-     */
-    function showPage(page) {
+      /*
+       * Cambio entre pantallas
+       */
+      function showPage(page) {
         document
-            .querySelectorAll('.page')
-            .forEach(item => item.classList.remove('active'));
+          .querySelectorAll(".page")
+          .forEach((item) => item.classList.remove("active"));
 
-        page.classList.add('active');
-    }
+        page.classList.add("active");
+      }
 
-
-    /*
-     * BOTÓN SÍ
-     */
-    yesButton.addEventListener('click', () => {
-        noButton.style.display = 'none';
+      /*
+       * BOTÓN SÍ
+       */
+      yesButton.addEventListener("click", () => {
+        noButton.style.display = "none";
         showPage(compensationPage);
-    });
+      });
 
+      /*
+       * ELECCIÓN DE COMPENSACIÓN
+       */
+      options.forEach((option) => {
+        option.addEventListener("click", () => {
+          options.forEach((item) => item.classList.remove("selected"));
 
-    /*
-     * ELECCIÓN DE COMPENSACIÓN
-     */
-    options.forEach(option => {
-        option.addEventListener('click', () => {
+          option.classList.add("selected");
 
-            options.forEach(item =>
-                item.classList.remove('selected')
-            );
+          selectedOption = option.dataset.value;
 
-            option.classList.add('selected');
+          compensationInput.value = selectedOption;
 
-            selectedOption = option.dataset.value;
+          continueButton.disabled = false;
+          continueButton.classList.add("enabled");
 
-            compensationInput.value = selectedOption;
-
-            continueButton.disabled = false;
-            continueButton.classList.add('enabled');
-
-            statusMessage.textContent = '';
-            statusMessage.className = 'status-message';
+          statusMessage.textContent = "";
+          statusMessage.className = "status-message";
         });
-    });
+      });
 
-
-    /*
-     * ENVÍO A FORMSPREE
-     */
-    compensationForm.addEventListener('submit', async event => {
+      /*
+       * ENVÍO A FORMSPREE
+       */
+      compensationForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         if (!selectedOption) {
-            return;
+          return;
         }
 
         continueButton.disabled = true;
-        continueButton.textContent = 'Registrando...';
+        continueButton.textContent = "Registrando...";
 
-        statusMessage.textContent =
-            'Registrando la compensación elegida...';
+        statusMessage.textContent = "Registrando la compensación elegida...";
 
-        statusMessage.className =
-            'status-message sending';
+        statusMessage.className = "status-message sending";
 
-        dateInput.value =
-            new Date().toISOString();
+        dateInput.value = new Date().toISOString();
 
-        const formData =
-            new FormData(compensationForm);
+        const formData = new FormData(compensationForm);
 
         try {
-            const response = await fetch(
-                compensationForm.action,
-                {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        Accept: 'application/json'
-                    }
-                }
-            );
+          const response = await fetch(compensationForm.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+              Accept: "application/json",
+            },
+          });
 
-            if (!response.ok) {
-                throw new Error(
-                    'Formspree respondió con un error'
-                );
-            }
+          if (!response.ok) {
+            throw new Error("Formspree respondió con un error");
+          }
 
-            selectedCompensation.textContent =
-                `Compensación elegida: ${selectedOption}`;
+          selectedCompensation.textContent = `Compensación elegida: ${selectedOption}`;
 
-            showPage(thanksPage);
-
+          showPage(thanksPage);
         } catch (error) {
+          console.error(error);
 
-            console.error(error);
+          statusMessage.textContent =
+            "No se pudo registrar la compensación. Intenta nuevamente.";
 
-            statusMessage.textContent =
-                'No se pudo registrar la compensación. Intenta nuevamente.';
+          statusMessage.className = "status-message error";
 
-            statusMessage.className =
-                'status-message error';
-
-            continueButton.disabled = false;
-            continueButton.textContent =
-                'Confirmar compensación';
+          continueButton.disabled = false;
+          continueButton.textContent = "Confirmar compensación";
         }
-    });
+      });
 
+      /*
+       * BOTÓN NO
+       */
+      function setInitialNoPosition() {
+        const yesRect = yesButton.getBoundingClientRect();
 
-    /*
-     * BOTÓN NO
-     */
-    function setInitialNoPosition() {
+        noButton.style.left = `${yesRect.right + 18}px`;
 
-        const yesRect =
-            yesButton.getBoundingClientRect();
+        noButton.style.top = `${yesRect.top}px`;
+      }
 
-        noButton.style.left =
-            `${yesRect.right + 18}px`;
+      /*
+       * Evita que pueda recibir focus mediante clic.
+       */
+      noButton.addEventListener("mousedown", (event) => event.preventDefault());
 
-        noButton.style.top =
-            `${yesRect.top}px`;
-    }
+      /*
+       * Mueve el botón alejándolo del mouse.
+       */
+      function moveNoButton(mouseX, mouseY) {
+        const rect = noButton.getBoundingClientRect();
 
+        const buttonCenterX = rect.left + rect.width / 2;
 
-    /*
-     * Evita que pueda recibir focus mediante clic.
-     */
-    noButton.addEventListener(
-        'mousedown',
-        event => event.preventDefault()
-    );
+        const buttonCenterY = rect.top + rect.height / 2;
 
+        let directionX = buttonCenterX - mouseX;
 
-    /*
-     * Mueve el botón alejándolo del mouse.
-     */
-    function moveNoButton(mouseX, mouseY) {
+        let directionY = buttonCenterY - mouseY;
 
-        const rect =
-            noButton.getBoundingClientRect();
-
-        const buttonCenterX =
-            rect.left + rect.width / 2;
-
-        const buttonCenterY =
-            rect.top + rect.height / 2;
-
-        let directionX =
-            buttonCenterX - mouseX;
-
-        let directionY =
-            buttonCenterY - mouseY;
-
-        if (
-            Math.abs(directionX) < 1 &&
-            Math.abs(directionY) < 1
-        ) {
-            directionX = Math.random() - .5;
-            directionY = Math.random() - .5;
+        if (Math.abs(directionX) < 1 && Math.abs(directionY) < 1) {
+          directionX = Math.random() - 0.5;
+          directionY = Math.random() - 0.5;
         }
 
-        const length =
-            Math.sqrt(
-                directionX ** 2 +
-                directionY ** 2
-            );
+        const length = Math.sqrt(directionX ** 2 + directionY ** 2);
 
         directionX /= length;
         directionY /= length;
 
         const escapeDistance = 150;
 
-        let newX =
-            rect.left +
-            directionX * escapeDistance;
+        let newX = rect.left + directionX * escapeDistance;
 
-        let newY =
-            rect.top +
-            directionY * escapeDistance;
+        let newY = rect.top + directionY * escapeDistance;
 
         const padding = 15;
 
         newX = Math.max(
-            padding,
-            Math.min(
-                window.innerWidth -
-                rect.width -
-                padding,
-                newX
-            )
+          padding,
+          Math.min(window.innerWidth - rect.width - padding, newX),
         );
 
         newY = Math.max(
-            padding,
-            Math.min(
-                window.innerHeight -
-                rect.height -
-                padding,
-                newY
-            )
+          padding,
+          Math.min(window.innerHeight - rect.height - padding, newY),
         );
 
         if (
-            newX <= padding + 5 ||
-            newX >=
-                window.innerWidth -
-                rect.width -
-                padding -
-                5
+          newX <= padding + 5 ||
+          newX >= window.innerWidth - rect.width - padding - 5
         ) {
-            newY =
-                Math.random() *
-                (
-                    window.innerHeight -
-                    rect.height -
-                    padding * 2
-                ) +
-                padding;
+          newY =
+            Math.random() * (window.innerHeight - rect.height - padding * 2) +
+            padding;
         }
 
         if (
-            newY <= padding + 5 ||
-            newY >=
-                window.innerHeight -
-                rect.height -
-                padding -
-                5
+          newY <= padding + 5 ||
+          newY >= window.innerHeight - rect.height - padding - 5
         ) {
-            newX =
-                Math.random() *
-                (
-                    window.innerWidth -
-                    rect.width -
-                    padding * 2
-                ) +
-                padding;
+          newX =
+            Math.random() * (window.innerWidth - rect.width - padding * 2) +
+            padding;
         }
 
         noButton.style.left = `${newX}px`;
         noButton.style.top = `${newY}px`;
-    }
+      }
 
-
-    /*
-     * Detectar cercanía del mouse.
-     */
-    document.addEventListener(
-        'mousemove',
-        event => {
-
-            if (
-                !apologyPage.classList.contains('active')
-            ) {
-                return;
-            }
-
-            const rect =
-                noButton.getBoundingClientRect();
-
-            const centerX =
-                rect.left + rect.width / 2;
-
-            const centerY =
-                rect.top + rect.height / 2;
-
-            const distance =
-                Math.hypot(
-                    event.clientX - centerX,
-                    event.clientY - centerY
-                );
-
-            if (distance < 120) {
-                moveNoButton(
-                    event.clientX,
-                    event.clientY
-                );
-            }
+      /*
+       * Detectar cercanía del mouse.
+       */
+      document.addEventListener("mousemove", (event) => {
+        if (!apologyPage.classList.contains("active")) {
+          return;
         }
-    );
 
+        const rect = noButton.getBoundingClientRect();
 
-    /*
-     * Dispositivos móviles.
-     */
-    noButton.addEventListener(
-        'touchstart',
-        event => {
+        const centerX = rect.left + rect.width / 2;
 
-            event.preventDefault();
+        const centerY = rect.top + rect.height / 2;
 
-            const touch =
-                event.touches[0];
+        const distance = Math.hypot(
+          event.clientX - centerX,
+          event.clientY - centerY,
+        );
 
-            moveNoButton(
-                touch.clientX,
-                touch.clientY
-            );
+        if (distance < 120) {
+          moveNoButton(event.clientX, event.clientY);
+        }
+      });
+
+      /*
+       * Dispositivos móviles.
+       */
+      noButton.addEventListener(
+        "touchstart",
+        (event) => {
+          event.preventDefault();
+
+          const touch = event.touches[0];
+
+          moveNoButton(touch.clientX, touch.clientY);
         },
         {
-            passive: false
+          passive: false,
+        },
+      );
+
+      /*
+       * Incluso si consiguen hacer clic...
+       */
+      noButton.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const rect = noButton.getBoundingClientRect();
+
+        moveNoButton(rect.left, rect.top);
+      });
+
+      window.addEventListener("load", setInitialNoPosition);
+
+      window.addEventListener("resize", () => {
+        if (apologyPage.classList.contains("active")) {
+          setInitialNoPosition();
         }
-    );
-
-
-    /*
-     * Incluso si consiguen hacer clic...
-     */
-    noButton.addEventListener(
-        'click',
-        event => {
-
-            event.preventDefault();
-
-            const rect =
-                noButton.getBoundingClientRect();
-
-            moveNoButton(
-                rect.left,
-                rect.top
-            );
-        }
-    );
-
-
-    window.addEventListener(
-        'load',
-        setInitialNoPosition
-    );
-
-
-    window.addEventListener(
-        'resize',
-        () => {
-
-            if (
-                apologyPage.classList.contains('active')
-            ) {
-                setInitialNoPosition();
-            }
-        }
-    );
-
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>
