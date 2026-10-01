@@ -1,696 +1,858 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>¿Me disculpas? ❤️</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <style>
-      * {
-        box-sizing: border-box;
+  <title>¿Me disculpas? ❤️</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background:
+        radial-gradient(circle at top left, #ffd9e2, transparent 35%),
+        radial-gradient(circle at bottom right, #ffe8c7, transparent 40%),
+        #fff7f8;
+      overflow: hidden;
+      color: #3f3034;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px) scale(0.98);
+      transition:
+        opacity 0.45s ease,
+        transform 0.45s ease,
+        visibility 0.45s;
+    }
+
+    .page.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .card {
+      width: min(520px, 100%);
+      padding: 36px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.87);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 28px;
+      box-shadow:
+        0 30px 80px rgba(120, 63, 80, 0.15),
+        0 4px 12px rgba(120, 63, 80, 0.06);
+    }
+
+    h1 {
+      margin: 10px 0;
+      font-size: clamp(2rem, 7vw, 3.3rem);
+      line-height: 1.05;
+    }
+
+    h2 {
+      margin: 10px 0;
+      font-size: 2rem;
+    }
+
+    p {
+      color: #7d656c;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .gif {
+      width: 190px;
+      height: 190px;
+      margin: 0 auto 12px;
+      object-fit: cover;
+      border-radius: 24px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .buttons {
+      min-height: 100px;
+      margin-top: 30px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 30px;
+      font: inherit;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    #yesButton {
+      background: #e55b78;
+      color: white;
+      box-shadow: 0 10px 25px rgba(229, 91, 120, 0.3);
+    }
+
+    #yesButton:hover {
+      background: #d94b69;
+    }
+
+    #noButton {
+      position: fixed;
+      background: #eee7e9;
+      color: #66575b;
+      z-index: 20;
+      transition:
+        left 0.18s ease,
+        top 0.18s ease,
+        transform 0.15s ease;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .option {
+      min-height: 115px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      border: 2px solid transparent;
+      border-radius: 20px;
+      background: #fff6f8;
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .option:hover {
+      transform: translateY(-4px);
+      border-color: #ef9aad;
+      background: white;
+      box-shadow: 0 12px 25px rgba(120, 63, 80, 0.1);
+    }
+
+    .option.selected {
+      border-color: #e55b78;
+      background: #fff0f3;
+    }
+
+    .option span {
+      font-size: 2.2rem;
+    }
+
+    .option strong {
+      margin-top: 8px;
+    }
+
+    .continue-button {
+      width: 100%;
+      margin-top: 24px;
+      background: #e55b78;
+      color: white;
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .continue-button.enabled {
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    .continue-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .heart {
+      display: inline-block;
+      font-size: 5rem;
+      animation: heartbeat 1.2s infinite;
+    }
+
+    .certificate-summary {
+      margin: 22px 0;
+      padding: 20px;
+      border-radius: 16px;
+      background: #fff0f3;
+      color: #b43c59;
+      font-weight: 700;
+      line-height: 1.8;
+    }
+
+    .certificate-summary div + div {
+      margin-top: 8px;
+    }
+
+    .small {
+      font-size: 0.87rem;
+      color: #a68f95;
+    }
+
+    .status-message {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      min-height: 1.4em;
+    }
+
+    .status-message.error {
+      color: #b42318;
+    }
+
+    .status-message.sending {
+      color: #7d656c;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% {
+        transform: scale(1);
       }
 
+      50% {
+        transform: scale(1.12);
+      }
+    }
+
+    @media (max-width: 560px) {
       body {
-        margin: 0;
-        min-height: 100vh;
-        font-family:
-          Inter,
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          sans-serif;
-        background:
-          radial-gradient(circle at top left, #ffd9e2, transparent 35%),
-          radial-gradient(circle at bottom right, #ffe8c7, transparent 40%),
-          #fff7f8;
-        overflow: hidden;
-        color: #3f3034;
+        overflow: auto;
       }
 
       .page {
-        position: absolute;
-        inset: 0;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        padding: 24px;
-
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(20px) scale(0.98);
-
-        transition:
-          opacity 0.45s ease,
-          transform 0.45s ease,
-          visibility 0.45s;
-      }
-
-      .page.active {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0) scale(1);
+        min-height: 100vh;
+        overflow-y: auto;
       }
 
       .card {
-        width: min(520px, 100%);
-        padding: 36px;
-        text-align: center;
-
-        background: rgba(255, 255, 255, 0.87);
-        backdrop-filter: blur(14px);
-
-        border: 1px solid rgba(255, 255, 255, 0.9);
-        border-radius: 28px;
-
-        box-shadow:
-          0 30px 80px rgba(120, 63, 80, 0.15),
-          0 4px 12px rgba(120, 63, 80, 0.06);
-      }
-
-      h1 {
-        margin: 10px 0;
-        font-size: clamp(2rem, 7vw, 3.3rem);
-        line-height: 1.05;
-      }
-
-      h2 {
-        margin: 10px 0;
-        font-size: 2rem;
-      }
-
-      p {
-        color: #7d656c;
-        font-size: 1.05rem;
-        line-height: 1.6;
-      }
-
-      .gif {
-        width: 190px;
-        height: 190px;
-
-        margin: 0 auto 12px;
-
-        object-fit: cover;
-        border-radius: 24px;
-
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
-      }
-
-      .buttons {
-        min-height: 100px;
-        margin-top: 30px;
-
-        position: relative;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 18px;
-      }
-
-      button {
-        border: none;
-        border-radius: 999px;
-
-        padding: 14px 30px;
-
-        font: inherit;
-        font-weight: 700;
-        font-size: 1rem;
-
-        cursor: pointer;
-
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease,
-          background-color 0.2s ease;
-      }
-
-      button:hover {
-        transform: translateY(-2px);
-      }
-
-      #yesButton {
-        background: #e55b78;
-        color: white;
-
-        box-shadow: 0 10px 25px rgba(229, 91, 120, 0.3);
-      }
-
-      #yesButton:hover {
-        background: #d94b69;
-      }
-
-      #noButton {
-        position: fixed;
-
-        background: #eee7e9;
-        color: #66575b;
-
-        z-index: 20;
-
-        transition:
-          left 0.18s ease,
-          top 0.18s ease,
-          transform 0.15s ease;
+        padding: 26px 20px;
       }
 
       .options {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 14px;
-        margin-top: 28px;
+        grid-template-columns: 1fr;
       }
 
-      .option {
-        min-height: 115px;
-
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        padding: 20px;
-
-        border: 2px solid transparent;
-        border-radius: 20px;
-
-        background: #fff6f8;
-
-        cursor: pointer;
-
-        transition:
-          transform 0.2s ease,
-          border-color 0.2s ease,
-          background-color 0.2s ease,
-          box-shadow 0.2s ease;
+      .gif {
+        width: 160px;
+        height: 160px;
       }
+    }
+  </style>
+</head>
 
-      .option:hover {
-        transform: translateY(-4px);
+<body>
+  <!-- ===================== -->
+  <!-- PÁGINA 1: DISCULPAS   -->
+  <!-- ===================== -->
 
-        border-color: #ef9aad;
-        background: white;
+  <section id="apologyPage" class="page active">
+    <div class="card">
+      <img
+        class="gif"
+        src="https://media.giphy.com/media/ISOckXUybVfQ4/giphy.gif"
+        alt="Carita pidiendo disculpas"
+      />
 
-        box-shadow: 0 12px 25px rgba(120, 63, 80, 0.1);
-      }
+      <h1>¿Me disculpas? 🥺</h1>
 
-      .option.selected {
-        border-color: #e55b78;
-        background: #fff0f3;
-      }
+      <p>
+        Puede que a veces me veas molesto o un poco distante, pero al final
+        del día no hay motivo para quedarnos atrapados en los detalles.
+        <br /><br />
+        Tú no has hecho nada malo. A veces simplemente se me cruzan los cables
+        y reacciono de una forma que no representa lo que realmente siento.
+        <br /><br />
+        Porque, tarde o temprano, siempre termina pesando más el cariño que
+        cualquier enojo pasajero.
+        <br /><br />
+        Así que sí… esta página existe porque me toca pedir disculpas. 😅❤️
+      </p>
 
-      .option span {
-        font-size: 2.2rem;
-      }
-
-      .option strong {
-        margin-top: 8px;
-      }
-
-      .continue-button {
-        width: 100%;
-        margin-top: 24px;
-
-        background: #e55b78;
-        color: white;
-
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-
-      .continue-button.enabled {
-        opacity: 1;
-        cursor: pointer;
-      }
-
-      .continue-button:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-
-      .heart {
-        display: inline-block;
-        font-size: 5rem;
-        animation: heartbeat 1.2s infinite;
-      }
-
-      .selected-compensation {
-        margin: 22px 0;
-        padding: 16px 20px;
-
-        border-radius: 16px;
-
-        background: #fff0f3;
-        color: #b43c59;
-
-        font-weight: 700;
-      }
-
-      .small {
-        font-size: 0.87rem;
-        color: #a68f95;
-      }
-
-      .status-message {
-        margin-top: 14px;
-        font-size: 0.9rem;
-      }
-
-      .status-message.error {
-        color: #b42318;
-      }
-
-      .status-message.sending {
-        color: #7d656c;
-      }
-
-      @keyframes heartbeat {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-
-        50% {
-          transform: scale(1.12);
-        }
-      }
-
-      @media (max-width: 560px) {
-        .card {
-          padding: 26px 20px;
-        }
-
-        .options {
-          grid-template-columns: 1fr;
-          max-height: 55vh;
-          overflow-y: auto;
-        }
-
-        .gif {
-          width: 160px;
-          height: 160px;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- ===================== -->
-    <!-- PÁGINA 1: DISCULPAS   -->
-    <!-- ===================== -->
-
-    <section id="apologyPage" class="page active">
-      <div class="card">
-        <img
-          class="gif"
-          src="https://media.giphy.com/media/ISOckXUybVfQ4/giphy.gif"
-          alt="Carita pidiendo disculpas"
-        />
-
-        <h1>¿Me disculpas? 🥺</h1>
-
-        <p>
-          Puede que a veces me veas molesto o un poco distante, pero al final
-          del día no hay motivo para quedarnos atrapados en los detalles.
-          <br /><br />
-          Tú no has hecho nada malo. A veces simplemente se me cruzan los cables
-          y reacciono de una forma que no representa lo que realmente siento.
-          <br /><br />
-          Porque, tarde o temprano, siempre termina pesando más el cariño que
-          cualquier enojo pasajero.
-          <br /><br />
-          Así que sí… esta página existe porque me toca pedir disculpas. 😅❤️
-        </p>
-
-        <div class="buttons">
-          <button id="yesButton" type="button">Sí ❤️</button>
-        </div>
-
-        <p class="small">Hay dos opciones... técnicamente.</p>
+      <div class="buttons">
+        <button id="yesButton" type="button">Sí ❤️</button>
       </div>
-    </section>
 
-    <button id="noButton" type="button" tabindex="-1" aria-label="No">
-      No 😶
-    </button>
+      <p class="small">Hay dos opciones... técnicamente.</p>
+    </div>
+  </section>
 
-    <!-- ========================= -->
-    <!-- PÁGINA 2: COMPENSACIÓN    -->
-    <!-- ========================= -->
+  <button id="noButton" type="button" tabindex="-1" aria-label="No">
+    No 😶
+  </button>
 
-    <section id="compensationPage" class="page">
-      <div class="card">
-        <h2>Compensación oficial 🍦</h2>
+  <!-- ========================== -->
+  <!-- PÁGINA 2: NIVEL DE PERDÓN -->
+  <!-- ========================== -->
 
-        <p>Toda disculpa seria necesita una compensación. Elige sabiamente:</p>
+  <section id="forgivenessPage" class="page">
+    <div class="card">
+      <h2>Nivel de perdón 😅</h2>
 
-        <div class="options">
-          <div class="option" data-value="Un helado 🍦">
-            <span>🍦</span>
-            <strong>Helado</strong>
-          </div>
+      <p>
+        Necesito conocer el estado actual de la situación.
+        Selecciona la opción que mejor represente tu veredicto:
+      </p>
 
-          <div class="option" data-value="Un café ☕">
-            <span>☕</span>
-            <strong>Café</strong>
-          </div>
-
-          <div class="option" data-value="Una cena 🍕">
-            <span>🍕</span>
-            <strong>Cena</strong>
-          </div>
-
-          <div class="option" data-value="Una salida al cine 🍿">
-            <span>🍿</span>
-            <strong>Cine</strong>
-          </div>
-
-          <div class="option" data-value="Una merienda 🧁">
-            <span>🧁</span>
-            <strong>Merienda</strong>
-          </div>
-
-          <div
-            class="option"
-            data-value="Elegir la compensación personalmente 👑"
-          >
-            <span>👑</span>
-            <strong>Yo elijo</strong>
-          </div>
-        </div>
-
-        <form
-          id="compensationForm"
-          action="https://formspree.io/f/xdeklwbb"
-          method="POST"
+      <div class="options">
+        <div
+          class="option forgiveness-option"
+          data-value="Te perdono, pero te estoy observando 👀"
         >
-          <input type="hidden" name="compensacion" id="compensationInput" />
+          <span>👀</span>
+          <strong>Te estoy observando</strong>
+        </div>
 
-          <input type="hidden" name="fecha" id="dateInput" />
+        <div class="option forgiveness-option" data-value="Todo bien 🙂">
+          <span>🙂</span>
+          <strong>Todo bien</strong>
+        </div>
 
-          <input type="hidden" name="origen" value="Página de disculpas" />
+        <div class="option forgiveness-option" data-value="Ya pasó 😄">
+          <span>😄</span>
+          <strong>Ya pasó</strong>
+        </div>
 
-          <button
-            type="submit"
-            id="continueButton"
-            class="continue-button"
-            disabled
-          >
-            Confirmar compensación
-          </button>
-
-          <div
-            id="statusMessage"
-            class="status-message"
-            aria-live="polite"
-          ></div>
-        </form>
+        <div class="option forgiveness-option" data-value="Ni me acordaba 😂">
+          <span>😂</span>
+          <strong>Ni me acordaba</strong>
+        </div>
       </div>
-    </section>
 
-    <!-- ======================= -->
-    <!-- PÁGINA 3: GRACIAS       -->
-    <!-- ======================= -->
+      <button
+        type="button"
+        id="forgivenessContinueButton"
+        class="continue-button"
+        disabled
+      >
+        Continuar a la compensación
+      </button>
+    </div>
+  </section>
 
-    <section id="thanksPage" class="page">
-      <div class="card">
-        <div class="heart">❤️</div>
+  <!-- ====================== -->
+  <!-- PÁGINA 3: COMPENSACIÓN -->
+  <!-- ====================== -->
 
-        <h1>Gracias</h1>
+  <section id="compensationPage" class="page">
+    <div class="card">
+      <h2>Compensación oficial 🍦</h2>
 
-        <p>Prometo apreciar este acto de misericordia.</p>
+      <p>
+        Bien, el perdón está encaminado. Ahora corresponde establecer
+        la compensación oficial. Elige sabiamente:
+      </p>
 
-        <div id="selectedCompensation" class="selected-compensation"></div>
+      <div class="options">
+        <div class="option compensation-option" data-value="Un helado 🍦">
+          <span>🍦</span>
+          <strong>Helado</strong>
+        </div>
 
-        <p>
-          Tu perdón ha sido registrado oficialmente. No se aceptan devoluciones.
-        </p>
+        <div class="option compensation-option" data-value="Un café ☕">
+          <span>☕</span>
+          <strong>Café</strong>
+        </div>
 
-        <p class="small">❤️ Fin del protocolo de disculpas ❤️</p>
+        <div class="option compensation-option" data-value="Una cena 🍕">
+          <span>🍕</span>
+          <strong>Cena</strong>
+        </div>
+
+        <div class="option compensation-option" data-value="Una salida al cine 🍿">
+          <span>🍿</span>
+          <strong>Cine</strong>
+        </div>
+
+        <div class="option compensation-option" data-value="Una merienda 🧁">
+          <span>🧁</span>
+          <strong>Merienda</strong>
+        </div>
+
+        <div
+          class="option compensation-option"
+          data-value="Elegir la compensación personalmente 👑"
+        >
+          <span>👑</span>
+          <strong>Yo elijo</strong>
+        </div>
       </div>
-    </section>
 
-    <script>
-      const apologyPage = document.getElementById("apologyPage");
-      const compensationPage = document.getElementById("compensationPage");
-      const thanksPage = document.getElementById("thanksPage");
+      <form
+        id="apologyForm"
+        action="https://formspree.io/f/xdeklwbb"
+        method="POST"
+      >
+        <input type="hidden" name="nivel_perdon" id="forgivenessInput" />
+        <input type="hidden" name="compensacion" id="compensationInput" />
+        <input type="hidden" name="fecha" id="dateInput" />
+        <input type="hidden" name="origen" value="Página de disculpas" />
 
-      const yesButton = document.getElementById("yesButton");
-      const noButton = document.getElementById("noButton");
+        <button
+          type="submit"
+          id="certificateButton"
+          class="continue-button"
+          disabled
+        >
+          Emitir certificado
+        </button>
 
-      const options = document.querySelectorAll(".option");
+        <div
+          id="statusMessage"
+          class="status-message"
+          aria-live="polite"
+        ></div>
+      </form>
+    </div>
+  </section>
 
-      const compensationForm = document.getElementById("compensationForm");
+  <!-- ========================== -->
+  <!-- PÁGINA 4: CERTIFICADO      -->
+  <!-- ========================== -->
 
-      const compensationInput = document.getElementById("compensationInput");
+  <section id="certificatePage" class="page">
+    <div class="card">
+      <div class="heart">❤️</div>
 
-      const dateInput = document.getElementById("dateInput");
+      <h1>Certificado de Perdón</h1>
 
-      const continueButton = document.getElementById("continueButton");
+      <p>
+        Se deja constancia oficial de que la solicitud de disculpas
+        ha sido aceptada y el expediente puede considerarse resuelto.
+      </p>
 
-      const selectedCompensation = document.getElementById(
-        "selectedCompensation",
-      );
+      <div class="certificate-summary">
+        <div id="certificateForgiveness"></div>
+        <div id="certificateCompensation"></div>
+      </div>
 
-      const statusMessage = document.getElementById("statusMessage");
+      <p>
+        ✔ Disculpa aceptada<br />
+        ✔ Nivel de perdón registrado<br />
+        ✔ Compensación seleccionada
+      </p>
 
-      let selectedOption = null;
+      <h2 style="margin-top: 28px">CASO CERRADO ✅</h2>
 
-      /*
-       * Cambio entre pantallas
-       */
-      function showPage(page) {
-        document
-          .querySelectorAll(".page")
-          .forEach((item) => item.classList.remove("active"));
+      <p class="small" id="certificateDate"></p>
+    </div>
+  </section>
 
-        page.classList.add("active");
+  <script>
+    const apologyPage = document.getElementById("apologyPage");
+    const forgivenessPage = document.getElementById("forgivenessPage");
+    const compensationPage = document.getElementById("compensationPage");
+    const certificatePage = document.getElementById("certificatePage");
+
+    const yesButton = document.getElementById("yesButton");
+    const noButton = document.getElementById("noButton");
+
+    const forgivenessOptions =
+      document.querySelectorAll(".forgiveness-option");
+
+    const compensationOptions =
+      document.querySelectorAll(".compensation-option");
+
+    const forgivenessContinueButton =
+      document.getElementById("forgivenessContinueButton");
+
+    const apologyForm =
+      document.getElementById("apologyForm");
+
+    const forgivenessInput =
+      document.getElementById("forgivenessInput");
+
+    const compensationInput =
+      document.getElementById("compensationInput");
+
+    const dateInput =
+      document.getElementById("dateInput");
+
+    const certificateButton =
+      document.getElementById("certificateButton");
+
+    const statusMessage =
+      document.getElementById("statusMessage");
+
+    const certificateForgiveness =
+      document.getElementById("certificateForgiveness");
+
+    const certificateCompensation =
+      document.getElementById("certificateCompensation");
+
+    const certificateDate =
+      document.getElementById("certificateDate");
+
+    let selectedForgiveness = null;
+    let selectedCompensation = null;
+
+    function showPage(page) {
+      document
+        .querySelectorAll(".page")
+        .forEach((item) => item.classList.remove("active"));
+
+      page.classList.add("active");
+    }
+
+    /*
+     * PÁGINA PRINCIPAL
+     */
+    yesButton.addEventListener("click", () => {
+      noButton.style.display = "none";
+      showPage(forgivenessPage);
+    });
+
+    /*
+     * NIVEL DE PERDÓN
+     */
+    forgivenessOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        forgivenessOptions.forEach((item) =>
+          item.classList.remove("selected")
+        );
+
+        option.classList.add("selected");
+
+        selectedForgiveness = option.dataset.value;
+        forgivenessInput.value = selectedForgiveness;
+
+        forgivenessContinueButton.disabled = false;
+        forgivenessContinueButton.classList.add("enabled");
+      });
+    });
+
+    forgivenessContinueButton.addEventListener("click", () => {
+      if (!selectedForgiveness) {
+        return;
       }
 
-      /*
-       * BOTÓN SÍ
-       */
-      yesButton.addEventListener("click", () => {
-        noButton.style.display = "none";
-        showPage(compensationPage);
+      showPage(compensationPage);
+    });
+
+    /*
+     * COMPENSACIÓN
+     */
+    compensationOptions.forEach((option) => {
+      option.addEventListener("click", () => {
+        compensationOptions.forEach((item) =>
+          item.classList.remove("selected")
+        );
+
+        option.classList.add("selected");
+
+        selectedCompensation = option.dataset.value;
+        compensationInput.value = selectedCompensation;
+
+        certificateButton.disabled = false;
+        certificateButton.classList.add("enabled");
+
+        statusMessage.textContent = "";
+        statusMessage.className = "status-message";
       });
+    });
 
-      /*
-       * ELECCIÓN DE COMPENSACIÓN
-       */
-      options.forEach((option) => {
-        option.addEventListener("click", () => {
-          options.forEach((item) => item.classList.remove("selected"));
+    /*
+     * FORMSPREE + EMISIÓN DEL CERTIFICADO
+     *
+     * El formulario se envía solamente cuando ya tenemos:
+     * - nivel de perdón
+     * - compensación
+     */
+    apologyForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
 
-          option.classList.add("selected");
+      if (!selectedForgiveness || !selectedCompensation) {
+        return;
+      }
 
-          selectedOption = option.dataset.value;
+      certificateButton.disabled = true;
+      certificateButton.textContent = "Emitiendo certificado...";
 
-          compensationInput.value = selectedOption;
+      statusMessage.textContent =
+        "Registrando el acuerdo...";
 
-          continueButton.disabled = false;
-          continueButton.classList.add("enabled");
+      statusMessage.className =
+        "status-message sending";
 
-          statusMessage.textContent = "";
-          statusMessage.className = "status-message";
+      dateInput.value = new Date().toISOString();
+
+      const formData = new FormData(apologyForm);
+
+      try {
+        const response = await fetch(apologyForm.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            Accept: "application/json",
+          },
         });
-      });
 
-      /*
-       * ENVÍO A FORMSPREE
-       */
-      compensationForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        if (!selectedOption) {
-          return;
+        if (!response.ok) {
+          throw new Error("Formspree respondió con un error");
         }
 
-        continueButton.disabled = true;
-        continueButton.textContent = "Registrando...";
+        certificateForgiveness.textContent =
+          `Nivel de perdón: ${selectedForgiveness}`;
 
-        statusMessage.textContent = "Registrando la compensación elegida...";
+        certificateCompensation.textContent =
+          `Compensación: ${selectedCompensation}`;
 
-        statusMessage.className = "status-message sending";
+        certificateDate.textContent =
+          `Emitido el ${new Date().toLocaleDateString("es-PY", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}`;
 
-        dateInput.value = new Date().toISOString();
+        showPage(certificatePage);
+      } catch (error) {
+        console.error(error);
 
-        const formData = new FormData(compensationForm);
+        statusMessage.textContent =
+          "No se pudo registrar el acuerdo. Intenta nuevamente.";
 
-        try {
-          const response = await fetch(compensationForm.action, {
-            method: "POST",
-            body: formData,
-            headers: {
-              Accept: "application/json",
-            },
-          });
+        statusMessage.className =
+          "status-message error";
 
-          if (!response.ok) {
-            throw new Error("Formspree respondió con un error");
-          }
+        certificateButton.disabled = false;
+        certificateButton.textContent =
+          "Emitir certificado";
+      }
+    });
 
-          selectedCompensation.textContent = `Compensación elegida: ${selectedOption}`;
+    /*
+     * BOTÓN NO
+     */
+    function setInitialNoPosition() {
+      const yesRect = yesButton.getBoundingClientRect();
 
-          showPage(thanksPage);
-        } catch (error) {
-          console.error(error);
+      noButton.style.left = `${yesRect.right + 18}px`;
+      noButton.style.top = `${yesRect.top}px`;
+    }
 
-          statusMessage.textContent =
-            "No se pudo registrar la compensación. Intenta nuevamente.";
+    /*
+     * Evita que el botón No reciba focus mediante clic.
+     */
+    noButton.addEventListener(
+      "mousedown",
+      (event) => event.preventDefault()
+    );
 
-          statusMessage.className = "status-message error";
+    /*
+     * Mueve el botón alejándolo del mouse.
+     */
+    function moveNoButton(mouseX, mouseY) {
+      const rect = noButton.getBoundingClientRect();
 
-          continueButton.disabled = false;
-          continueButton.textContent = "Confirmar compensación";
-        }
-      });
+      const buttonCenterX =
+        rect.left + rect.width / 2;
 
-      /*
-       * BOTÓN NO
-       */
-      function setInitialNoPosition() {
-        const yesRect = yesButton.getBoundingClientRect();
+      const buttonCenterY =
+        rect.top + rect.height / 2;
 
-        noButton.style.left = `${yesRect.right + 18}px`;
+      let directionX =
+        buttonCenterX - mouseX;
 
-        noButton.style.top = `${yesRect.top}px`;
+      let directionY =
+        buttonCenterY - mouseY;
+
+      if (
+        Math.abs(directionX) < 1 &&
+        Math.abs(directionY) < 1
+      ) {
+        directionX = Math.random() - 0.5;
+        directionY = Math.random() - 0.5;
       }
 
-      /*
-       * Evita que pueda recibir focus mediante clic.
-       */
-      noButton.addEventListener("mousedown", (event) => event.preventDefault());
+      const length =
+        Math.sqrt(directionX ** 2 + directionY ** 2);
 
-      /*
-       * Mueve el botón alejándolo del mouse.
-       */
-      function moveNoButton(mouseX, mouseY) {
-        const rect = noButton.getBoundingClientRect();
+      directionX /= length;
+      directionY /= length;
 
-        const buttonCenterX = rect.left + rect.width / 2;
+      const escapeDistance = 150;
 
-        const buttonCenterY = rect.top + rect.height / 2;
+      let newX =
+        rect.left + directionX * escapeDistance;
 
-        let directionX = buttonCenterX - mouseX;
+      let newY =
+        rect.top + directionY * escapeDistance;
 
-        let directionY = buttonCenterY - mouseY;
+      const padding = 15;
 
-        if (Math.abs(directionX) < 1 && Math.abs(directionY) < 1) {
-          directionX = Math.random() - 0.5;
-          directionY = Math.random() - 0.5;
-        }
-
-        const length = Math.sqrt(directionX ** 2 + directionY ** 2);
-
-        directionX /= length;
-        directionY /= length;
-
-        const escapeDistance = 150;
-
-        let newX = rect.left + directionX * escapeDistance;
-
-        let newY = rect.top + directionY * escapeDistance;
-
-        const padding = 15;
-
-        newX = Math.max(
-          padding,
-          Math.min(window.innerWidth - rect.width - padding, newX),
-        );
-
-        newY = Math.max(
-          padding,
-          Math.min(window.innerHeight - rect.height - padding, newY),
-        );
-
-        if (
-          newX <= padding + 5 ||
-          newX >= window.innerWidth - rect.width - padding - 5
-        ) {
-          newY =
-            Math.random() * (window.innerHeight - rect.height - padding * 2) +
-            padding;
-        }
-
-        if (
-          newY <= padding + 5 ||
-          newY >= window.innerHeight - rect.height - padding - 5
-        ) {
-          newX =
-            Math.random() * (window.innerWidth - rect.width - padding * 2) +
-            padding;
-        }
-
-        noButton.style.left = `${newX}px`;
-        noButton.style.top = `${newY}px`;
-      }
-
-      /*
-       * Detectar cercanía del mouse.
-       */
-      document.addEventListener("mousemove", (event) => {
-        if (!apologyPage.classList.contains("active")) {
-          return;
-        }
-
-        const rect = noButton.getBoundingClientRect();
-
-        const centerX = rect.left + rect.width / 2;
-
-        const centerY = rect.top + rect.height / 2;
-
-        const distance = Math.hypot(
-          event.clientX - centerX,
-          event.clientY - centerY,
-        );
-
-        if (distance < 120) {
-          moveNoButton(event.clientX, event.clientY);
-        }
-      });
-
-      /*
-       * Dispositivos móviles.
-       */
-      noButton.addEventListener(
-        "touchstart",
-        (event) => {
-          event.preventDefault();
-
-          const touch = event.touches[0];
-
-          moveNoButton(touch.clientX, touch.clientY);
-        },
-        {
-          passive: false,
-        },
+      newX = Math.max(
+        padding,
+        Math.min(
+          window.innerWidth - rect.width - padding,
+          newX
+        )
       );
 
-      /*
-       * Incluso si consiguen hacer clic...
-       */
-      noButton.addEventListener("click", (event) => {
+      newY = Math.max(
+        padding,
+        Math.min(
+          window.innerHeight - rect.height - padding,
+          newY
+        )
+      );
+
+      if (
+        newX <= padding + 5 ||
+        newX >=
+          window.innerWidth -
+            rect.width -
+            padding -
+            5
+      ) {
+        newY =
+          Math.random() *
+            (
+              window.innerHeight -
+              rect.height -
+              padding * 2
+            ) +
+          padding;
+      }
+
+      if (
+        newY <= padding + 5 ||
+        newY >=
+          window.innerHeight -
+            rect.height -
+            padding -
+            5
+      ) {
+        newX =
+          Math.random() *
+            (
+              window.innerWidth -
+              rect.width -
+              padding * 2
+            ) +
+          padding;
+      }
+
+      noButton.style.left = `${newX}px`;
+      noButton.style.top = `${newY}px`;
+    }
+
+    /*
+     * Detectar cercanía del mouse.
+     */
+    document.addEventListener("mousemove", (event) => {
+      if (!apologyPage.classList.contains("active")) {
+        return;
+      }
+
+      const rect =
+        noButton.getBoundingClientRect();
+
+      const centerX =
+        rect.left + rect.width / 2;
+
+      const centerY =
+        rect.top + rect.height / 2;
+
+      const distance =
+        Math.hypot(
+          event.clientX - centerX,
+          event.clientY - centerY
+        );
+
+      if (distance < 120) {
+        moveNoButton(
+          event.clientX,
+          event.clientY
+        );
+      }
+    });
+
+    /*
+     * Dispositivos móviles.
+     */
+    noButton.addEventListener(
+      "touchstart",
+      (event) => {
         event.preventDefault();
 
-        const rect = noButton.getBoundingClientRect();
+        const touch = event.touches[0];
 
-        moveNoButton(rect.left, rect.top);
-      });
+        moveNoButton(
+          touch.clientX,
+          touch.clientY
+        );
+      },
+      {
+        passive: false,
+      }
+    );
 
-      window.addEventListener("load", setInitialNoPosition);
+    /*
+     * Incluso si consiguen hacer clic...
+     */
+    noButton.addEventListener("click", (event) => {
+      event.preventDefault();
 
-      window.addEventListener("resize", () => {
-        if (apologyPage.classList.contains("active")) {
-          setInitialNoPosition();
-        }
-      });
-    </script>
-  </body>
+      const rect =
+        noButton.getBoundingClientRect();
+
+      moveNoButton(
+        rect.left,
+        rect.top
+      );
+    });
+
+    window.addEventListener(
+      "load",
+      setInitialNoPosition
+    );
+
+    window.addEventListener("resize", () => {
+      if (
+        apologyPage.classList.contains("active")
+      ) {
+        setInitialNoPosition();
+      }
+    });
+  </script>
+</body>
+
 </html>
